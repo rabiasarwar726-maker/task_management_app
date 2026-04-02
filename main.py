@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from src.utils.db import Base, engine
+from src.utils.db import Base, engine, get_db
 from src.tasks.router import task_routes
 from src.users.router import user_routes
 
