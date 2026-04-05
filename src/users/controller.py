@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException,status,Request
 from src.users.dtos import UserSchema,LoginSchema
 from sqlalchemy.orm import Session
 from src.users.models import UserModel
@@ -45,3 +45,6 @@ def login_user(body:LoginSchema,db:Session):
   
   return{"token":token}
   return{"message": "Login successful", "user": user}
+def is_authenticated(request: Request,db:Session):
+  print(request)
+  return "Done"
