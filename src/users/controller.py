@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from src.users.dtos import UserSchema
+from src.users.dtos import UserSchema,LoginSchema
 from sqlalchemy.orm import Session
 from src.users.models import UserModel
 from pwdlib import PasswordHash
@@ -28,3 +28,10 @@ def register(body:UserSchema,db:Session):
   db.commit()
   db.refresh(new_user)
   return{"message": "User registered successfully"}
+def login_user(body:LoginSchema,db:Session):
+  user=db.query(UserModel).filter(UserModel.username==body.username).first()
+  if not user:
+    raise HTTPException(status_code=400, detail="Invalid username or password")
+  if not password_hasher.verify(body.password, user.hash_password):
+    raise HTTPException(status_code=400, detail="Invalid username or password")
+  return{"message": "Login successful", "user": user}
