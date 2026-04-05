@@ -14,5 +14,5 @@ def register(body: UserSchema, db: Session=Depends(get_db)):
 
 
 @user_routes.post("/login",status_code=status.HTTP_200_OK)
-def login(body:LoginSchema,db:Session):
+def login(body:LoginSchema,db:Session=Depends(get_db)):
     return controller.login_user(body,db)
