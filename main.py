@@ -13,6 +13,12 @@ app.include_router(task_routes)
 app.include_router(user_routes)
 from sqlalchemy import text
 
+
+@app.get("/")
+def root():
+    return {"message":"API is working successfully"}
+
+
 @app.get("/db-check")
 def db_check(db: Session = Depends(get_db)):
     result = db.execute(text("SELECT 1"))
