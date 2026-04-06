@@ -45,19 +45,28 @@ def login_user(body:LoginSchema,db:Session):
   
   return{"token":token}
   return{"message": "Login successful", "user": user}
-def is_authenticated(request: Request,db:Session):
-  token=request.headers.get("Authorization")
-  token=token.split(" ")[-1]
 
-  data=jwt.decode(token,settings.SECRET_KEY,settings.ALGORITHM)
-  user_id=data.get("_id")
-  exp_time=data.get("exp")
+  def is_authenticated(request: Request, db: Session = Depends(get_db)):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Missing Authorization Header")
 
-  current_time=datetime.now().timestamp()
-  if current_time>exp_time:
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
-   
-  user=db.query(UserModel).filter(UserModel.id==user_id).first()
-  if not user:
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized")
-  return user
+    try:
+        token = auth_header.split(" ")[-1]
+        # jwt.decode automatically checks 'exp' and raises ExpiredSignatureError
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        
+        user_id = payload.get("_id")
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Invalid token payload")
+            
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
+
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+        
+    return user
