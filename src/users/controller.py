@@ -46,5 +46,9 @@ def login_user(body:LoginSchema,db:Session):
   return{"token":token}
   return{"message": "Login successful", "user": user}
 def is_authenticated(request: Request,db:Session):
-  print(request.headers)
+  token=request.headers.get("Authorization")
+  token=token.split(" ")[-1]
+
+  data=jwt.decode(token,settings.SECRET_KEY,settings.ALGORITHM)
+  print(data)
   return "Done"
