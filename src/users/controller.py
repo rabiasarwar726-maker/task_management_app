@@ -50,5 +50,14 @@ def is_authenticated(request: Request,db:Session):
   token=token.split(" ")[-1]
 
   data=jwt.decode(token,settings.SECRET_KEY,settings.ALGORITHM)
-  print(data)
-  return "Done"
+  user_id=data.get("_id")
+  exp_time=data.get("exp")
+
+  current_time=datetime.now().timestamp()
+  if current_time>exp_time:
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
+   
+  user=db.query(UserModel).filter(UserModel.id==user_id).first()
+  if not user:
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized")
+  return user
