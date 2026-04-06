@@ -53,7 +53,7 @@ def login_user(body:LoginSchema,db:Session):
 
     try:
         token = auth_header.split(" ")[-1]
-        # jwt.decode automatically checks 'exp' and raises ExpiredSignatureError
+        
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         
         user_id = payload.get("_id")
